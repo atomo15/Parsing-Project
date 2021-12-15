@@ -1,154 +1,115 @@
 grammar parsingProject;
 
-// http://blog.anvard.org/articles/2016/03/15/antlr-python.html for tabs and variable defs
+
+/* TODO:
+1) finish adding tokens for miscelaneous characters such as ( { " , :
+2) create tokens for compound things such as strings or function calls ...
+3) write rules to handle these changes and complete lines like an assignment or if satatement
+4) address any issues with context switches - https://tobebuilds.com/parsing-string-interpolations-with-antlr4/
+/*
+
+
+
+
+/* FROM HIS EXAMPLE */
+//multiplyingExpression
+//   : number ((TIMES | DIV) number)*
+//   ;
+//
+//number
+//   : MINUS? DIGIT +
+//   ;
+
+
+// RULES:
 
 expression
-   : multiplyingExpression ((PLUS | MINUS) multiplyingExpression)*
-   ;
-
-multiplyingExpression
-   : number ((TIMES | DIV) number)*
-   ;
-
-number
-   : MINUS? DIGIT +
-   ;
-
-//TOKENS
-
-WS
-    : (' ' | '\n' )+ -> skip
-    ;
-
-TAB
-    : ('\t')
-    ;
-
-
-// conditional blocks
-IF
-   : 'if'
-   ;
-
-ELSE
-   : 'else'
-   ;
-
-// variable definitions in python?
-
-// all possible names for a variable
-ID
-    : [a-z][a-zA-Z0-9_]*
-    ;
-
-
-// iterative loops
-WHILE
-   : 'while'
-   ;
-
-FOR
-   : 'for'
+   : comment
    ;
 
 
+comment
+   : COMMENT
+   ;
+
+
+
+
+//TOKENS:
+
+/* KEYWORDS: */
+//conditionals
+IF : 'if' ;
+ELIF : 'elif' ;
+ELSE : 'else' ;
+//iteratives
+FOR : 'for' ;
+WHILE : 'while' ;
+//evaluators
+AND : 'and' ;
+OR : 'or' ;
+//booleans
+TRUE : 'True' ;
+FALSE : 'False' ;
+//functions
+PRINT : 'print(' (ID | STRING)+ ')' ;
+RANGE : 'range(' (NUMERIC_ID | INT) ',' ' '* (ID | INT) ')' ;
+STR : 'str(' STRING ')' ;
+//misc.
+IN : 'in' ;
+RETURN : 'return' ;
+BREAK : 'break' ;
+CONTINUE : 'continue' ;
+NOT : 'not' ;
+NONE : 'None' ;
+
+
+/* TYPES */
+// numeric
+INT : DIGIT+ ;
+FLOAT : DIGIT*  '.' DIGIT+ ;
+// strings
+STRING : '"' (~["\\\r\n"'] | '\\')* '"' ;
+
+
+/* RUBRIK REQUIREMENTS */
+// identifiers
+ID : [a-zA-Z_][a-zA-Z0-9_]* ;
+NUMERIC_ID : DIGIT* ~[""] ;
 // arithmetic operators
-PLUS
-   : '+'
-   ;
-
-MINUS
-   : '-'
-   ;
-
-TIMES
-   : '*'
-   ;
-
-DIV
-   : '/'
-   ;
-
-MOD
-   : '%'
-   ;
-
-// ^ is not an arithmetic operator in python, exponential operator is ** in python, ^ is bitwise XOR
-POWER
-   : '^'
-   ;
-
-// WAS NOT A REQUIREMENT BUT GOOD TO HAVE IMO, WE CAN REMOVE IF YOU GUYS WANT
-DIGIT
-   : ('0' .. '9')
-   ;
-
+PLUS : '+' ;
+MINUS : '-' ;
+TIMES : '*' ;
+DIV : '/' ;
+FLOOR_DIV : '//' ;
+MOD : '%' ;
+EXPONENT : '**' ;
 // assignment operators
-EQUALS
-   : '='
-   ;
-
-PLUS_EQUALS
-   : '+='
-   ;
-
-MINUS_EQUALS
-   : '-='
-   ;
-
-TIMES_EQUALS
-   : '*='
-   ;
-
-DIVIDE_EQUALS
-   : '/='
-   ;
-
-// ^= is not an assignment operator in python, exponential operator is **= in python, ^= is bitwise
-POWER_EQUALS
-   : '^='
-   ;
-
-MOD_EQUALS
-   : '%='
-   ;
-
-
-
+EQUALS : '=' ;
+PLUS_EQUALS : '+=' ;
+MINUS_EQUALS : '-=' ;
+TIMES_EQUALS : '*=' ;
+DIVIDE_EQUALS : '/=' ;
+EXPONENT_EQUALS : '**=' ;
+MOD_EQUALS : '%=' ;
 // conditional statements
-LT
-   : '<'
-   ;
-
-LE
-   : '<='
-   ;
-
-GT
-   : '>'
-   ;
-
-GE
-   : '>='
-   ;
-
-EQ
-   : '=='
-   ;
-
-NE
-   : '!='
-   ;
-
-
-
-
+LT : '<' ;
+LE : '<=' ;
+GT : '>' ;
+GE : '>=' ;
+EQ : '==' ;
+NE : '!=' ;
 // comments
-COMMENT
-   : '#' ~[\n]* -> skip
-   ;
+COMMENT : '#' ~[\n\r\f]* -> skip ;
 
-// syntax could be wrong on this with brackets
-MULTI_LINE_COMMENT
-   : '"""' ~["""] -> skip
-   ;
+
+
+
+/* UTILITY */
+// white space
+WS : (' ')+ -> skip ;
+TAB : ('\t') ;
+NEW_LINE : ('\n') -> skip ;
+DIGIT : ('0' .. '9') ;
+
+
